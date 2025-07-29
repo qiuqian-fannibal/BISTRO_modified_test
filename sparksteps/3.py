@@ -8,17 +8,21 @@ from pyspark.sql.window import Window
 from pyspark.sql.types import *
 
 os.environ["HADOOP_USER_NAME"] = "xxx"
+os.environ["PYSPARK_PYTHON"] = "E:/pycharm_projects/BISTRO/.venv/Scripts/python.exe"
 
 
 K_job = 500
 K_person = 1000  # number of person classes ### same as the K in 16.data_xxx.ipynb
 numTopics = 1000  
-test_days = 60
+test_days = 1
 start_date = sys.argv[1]
 end_date = sys.argv[2]
 path = sys.argv[3]
-file_path = 'file://' + path
+#file_path = 'file://' + path
+file_path = path
 city_short = sys.argv[4]
+
+
 
 def generate_train_test_dates(start_date, end_date):
     start = datetime.datetime.strptime(start_date, '%Y-%m-%d')
@@ -43,6 +47,7 @@ spark = SparkSession\
     .getOrCreate()
 spark.sparkContext.setLogLevel("ERROR")
 
+#log = spark.read.parquet(f'{file_path}')
 log = spark.read.parquet(f'{file_path}/sparksteps/0data/202code2_query_{city_short}/log')
 log_train = log.filter(F.col('date').isin(dates_train)).cache()
 log_test = log.filter(F.col('date').isin(dates_test)).cache()

@@ -13,13 +13,17 @@ os.environ["HADOOP_USER_NAME"] = "xxx"
 K_job = 500
 K_person = 1000  # number of person classes ### same as the K in 16.data_xxx.ipynb
 numTopics = 1000  
-test_days = 60
+test_days = 1
 ddays = 7
 start_date = sys.argv[1]
 end_date = sys.argv[2]
 path = sys.argv[3]
-file_path = 'file://' + path
+file_path = path
+#file_path = 'file://' + path
 city_short = sys.argv[4]
+
+
+
 
 def generate_train_test_dates(start_date, end_date):
     start = datetime.datetime.strptime(start_date, '%Y-%m-%d')
@@ -133,10 +137,11 @@ log_test.show()
 
 
 # For training data
-log_train.write.mode('overwrite').parquet(f'file:///individual/hanxiao/train/log_res')
+log_train.write.mode('overwrite').parquet(f'file:///E:/pycharm_projects/BISTRO/sparksteps/train/log_res')
+
 print('log train cnt:', log_train.count())
 
 # For testing data
-log_test.write.mode('overwrite').parquet(f'file:///individual/hanxiao/test/log_res')
+log_test.write.mode('overwrite').parquet(f'file:///E:/pycharm_projects/BISTRO/sparksteps/test/log_res')
 print('log test cnt:', log_test.count())
 

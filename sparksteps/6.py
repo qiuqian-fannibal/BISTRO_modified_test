@@ -12,7 +12,7 @@ os.environ["HADOOP_USER_NAME"] = "xxx"
 K_job = 500
 K_person = 1000  # number of person classes ### same as the K in 16.data_xxx.ipynb
 numTopics = 1000  
-test_days = 60
+test_days = 1
 ddays = 7
 LIST_CNT = 30
 TOP_K = 20
@@ -39,13 +39,13 @@ print('dates test:', dates_test)
 
 # For training data
 dict_train = {}
-with open(f'{path}/train/relation/dict.pkl', 'rb') as f:
+with open(f'{path}/sparksteps/train/relation/dict.pkl', 'rb') as f:
     dict_train = pkl.load(f)
 print('count train:', len(dict_train))
 
 # For testing data
 dict_test = {}
-with open(f'{path}/test/relation/dict.pkl', 'rb') as f:
+with open(f'{path}/sparksteps/test/relation/dict.pkl', 'rb') as f:
     dict_test = pkl.load(f)
     
 from scipy.sparse import coo_matrix, linalg
@@ -75,8 +75,8 @@ def A_cal(row, col, values, N, M, deg_n, deg_e, w_e):
 
 # For training data
 kk = 0
-if not os.path.exists(f'{path}/train/sample'):
-    os.mkdir(f'{path}/train/sample')
+if not os.path.exists(f'{path}/sparksteps/train/sample'):
+    os.mkdir(f'{path}/sparksteps/train/sample')
 for a in range(K_person):
     b = dict_train[a]
     if a % 100 == 0:
@@ -114,7 +114,7 @@ for a in range(K_person):
         cnt = 0
         geek_id = -1
         for c in range(b):
-            file = f'{path}/train/relation/relation_'+str(a)+'_'+str(c)+'.csv'
+            file = f'{path}/sparksteps/train/relation/relation_'+str(a)+'_'+str(c)+'.csv'
             df = pd.read_csv(file)
 
             job_list = df['pred_job'].values.tolist()
@@ -181,7 +181,7 @@ for a in range(K_person):
             clustercenters = pkl.load(f)
         Fea = np.array(clustercenters)
 
-        with open(f'{path}/train/sample/datasample_'+str(kk)+'.pkl', 'wb') as f:
+        with open(f'{path}/sparksteps/train/sample/datasample_'+str(kk)+'.pkl', 'wb') as f:
             data = (A1, A2, Fea, joblst, label, geek_id)
             if a % 100 == 0:
                 print('\t', geek_id)
@@ -191,8 +191,8 @@ kk_train = kk
 
 # For testing data
 kk = 0
-if not os.path.exists(f'{path}/test/sample'):
-    os.mkdir(f'{path}/test/sample')
+if not os.path.exists(f'{path}/sparksteps/test/sample'):
+    os.mkdir(f'{path}/sparksteps/test/sample')
 for a in range(K_person):
     b = dict_test[a]
     if a % 100 == 0:
@@ -227,7 +227,7 @@ for a in range(K_person):
         cnt = 0
         geek_id = -1
         for c in range(b):
-            file = f'{path}/test/relation/relation_'+str(a)+'_'+str(c)+'.csv'
+            file = f'{path}/sparksteps/test/relation/relation_'+str(a)+'_'+str(c)+'.csv'
             df = pd.read_csv(file)
 
             job_list = df['pred_job'].values.tolist()
@@ -304,7 +304,7 @@ for a in range(K_person):
         Fea = np.array(clustercenters)
         # print('\tocc features shape:', Fea.shape)
 
-        with open(f'{path}/test/sample/datasample_'+str(kk)+'.pkl', 'wb') as f:
+        with open(f'{path}/sparksteps/test/sample/datasample_'+str(kk)+'.pkl', 'wb') as f:
             data = (A1, A2, Fea, joblst, label, geek_id)
             if a % 100 == 0:
                 print('\t', geek_id, ',', joblst, ',', label)

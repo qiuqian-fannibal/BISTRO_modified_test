@@ -6,31 +6,33 @@ import datetime
 from pyspark.sql import SparkSession, functions as F
 from pyspark.sql.window import Window
 from pyspark.sql.types import *
+import numpy as np
 
 os.environ["HADOOP_USER_NAME"] = "xxx"
-
+os.environ["PYSPARK_PYTHON"] = "E:/pycharm_projects/BISTRO/.venv/Scripts/python.exe"
 
 K_job = 500
 K_person = 1000  # number of person classes ### same as the K in 16.data_xxx.ipynb
-numTopics = 1000  
-test_days = 60
+numTopics = 1000
+test_days = 1
 POS_CODE_LOW = '100000'
 POS_CODE_HIGH = '110000'
 start_date = sys.argv[1]
 end_date = sys.argv[2]
 path = sys.argv[3]
-file_path = 'file://' + path
+#file_path = 'file://' + path
+file_path = path
 city_short = sys.argv[4]
 
 def generate_train_test_dates(start_date, end_date):
     start = datetime.datetime.strptime(start_date, '%Y-%m-%d')
     end = datetime.datetime.strptime(end_date, '%Y-%m-%d')
-    
+
     date_list_train = [(start + datetime.timedelta(days=x)).strftime('%Y-%m-%d')
                  for x in range(0, (end - start).days + 1 - test_days)]
     date_list_test = [(start + datetime.timedelta(days=x)).strftime('%Y-%m-%d')
                  for x in range((end - start).days + 1 - test_days, (end - start).days + 1)]
-    
+
     return date_list_train, date_list_test
 
 dates_train, dates_test = generate_train_test_dates(start_date, end_date)
@@ -188,7 +190,7 @@ occ_test.write.mode('overwrite').parquet(f'{file_path}/sparksteps/test/occ_tmp')
 occ_test = occ_test.withColumn("position_code", occ_test.position_code-100000)
 for name in inputs1:
     occ_test = occ_test.drop(name)
-    
+
 occ_train.show(1)
 occ_train = occ_train.dropna(how='any')
 occ_test.show(1)
@@ -227,8 +229,10 @@ stddata_train = model_one.transform(tansdata_train)
 stddata_train.show(1)
 
 # For testing data
-if os.path.exists(f'{path}/hanxiao/models/StandardScaler_occ'):
-    model_one = StandardScalerModel.load(f'{file_path}/sparksteps/models/StandardScaler_occ')
+'''if os.path.exists(f'{path}/hanxiao/models/StandardScaler_occ'):
+    model_one = StandardScalerModel.load(f'{file_path}/sparksteps/models/StandardScaler_occ')'''
+
+model_one = StandardScalerModel.load(f'{file_path}/sparksteps/models/StandardScaler_occ')
 
 stddata_test = model_one.transform(tansdata_test)
 stddata_test.show(1)
@@ -263,7 +267,7 @@ from pyspark.ml.evaluation import ClusteringEvaluator
 
 if os.path.exists(f'{file_path}/sparksteps/models/KMeans_occ'):
     model_two = KMeansModel.load(f'{file_path}/sparksteps/models/KMeans_occ')
-    
+
 # # Evaluate clustering by computing Silhouette score
 evaluator = ClusteringEvaluator()
 
@@ -278,9 +282,11 @@ print(type(clustercenters))
 # print(clustercenters)
 
 import pickle as pkl
-with open(f'{path}/models/Clustercenters_occ.pkl', 'wb') as f:
+import os
+os.makedirs(f'{file_path}/models', exist_ok=True)
+with open(f'{file_path}/models/Clustercenters_occ.pkl', 'wb') as f:
     pkl.dump(clustercenters, f)
-    
+
 def extract_feature(vec, index):
     try:
         return float(vec[index])

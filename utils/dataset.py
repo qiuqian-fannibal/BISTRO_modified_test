@@ -9,6 +9,8 @@ from utils.preprocess.Preprocessing import Preprocessing
 import warnings
 warnings.filterwarnings("ignore")
 
+os.environ["PYSPARK_PYTHON"] = "E:/pycharm_projects/BISTRO/.venv/Scripts/python.exe"
+
 def transform_list(input_list, k):
     unique_list = []
     [unique_list.append(x) for x in input_list if x not in unique_list]
@@ -20,7 +22,7 @@ def transform_list(input_list, k):
 
 class JobDataset(Dataset):
     def __init__(self,
-                 root="/individual/hanxiao/sample",
+                 root="/sparksteps",
                  mode="train",
                  top_k = 10,
                  order=3, clip_num=0.0,val_prop=0.2,k_job=100, k_person=500):
@@ -65,7 +67,7 @@ class JobDataset(Dataset):
         while(True):
             if index in self.memory.keys():
                 return self.memory[index]
-            
+
             f = open(self.samples[index], 'rb')
             A1, A2, Fea, joblst, label, geek_id = pkl.load(f)
             N = len(Fea)
@@ -108,7 +110,7 @@ class JobDataset(Dataset):
             # Construct the sparse matrix
             sparse2 = torch.sparse_coo_tensor(phi2_indices, phi2_values, torch.Size([N, N]))
             sparse2_inverse = torch.sparse_coo_tensor(phi2_inverse_indices, phi2_inverse_values, torch.Size([N, N]))
-            
+
 #             print('11111#####11111')
             data = {"phi1": sparse1,
                     "phi1_inverse": sparse1_inverse,
